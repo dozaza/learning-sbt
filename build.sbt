@@ -1,9 +1,5 @@
 name := "learning-sbt"
 
-organization := "com.github.dozaza"
-
-version := "1.0"
-
 libraryDependencies ++= Seq(
   "junit" % "junit" % "4.11" % "test",
   "org.specs2" % "specs2_2.10" % "2.1.1" % "test"
@@ -14,18 +10,11 @@ val gitHeadCommitSha = taskKey[String](
   "Determines the current git commit SHA"
 )
 
-gitHeadCommitSha := Process("git rev-parse HEAD").lines.head
+gitHeadCommitSha in ThisBuild := Process("git rev-parse HEAD").lines.head
 
 val makeVersionProperties = taskKey[Seq[File]] (
   "Make a version.properties file."
 )
-
-makeVersionProperties := {
-  val propFile = new File((resourceManaged in Compile).value, "version.properties")
-  val content = "version=%s" format gitHeadCommitSha.value
-  IO.write(propFile, content)
-  Seq(propFile)
-}
 
 val taskA = taskKey[Unit]("taskA")
 val taskB = taskKey[Unit]("taskB")
@@ -43,4 +32,27 @@ taskB := {
 taskC := {
   Thread.sleep(5000)
   println("taskC")
+}
+
+lazy val core_library = learningSbtProject("core-library").settings()
+
+lazy val common = learningSbtProject("common").settings(
+  makeVersionProperties := {
+    val propFile = (resourceManaged in Compile).value / "version.properties"
+    val content = "version=%s" format gitHeadCommitSha.value
+    IO.write(propFile, content)
+    Seq(propFile)
+  }
+)
+
+lazy val analytics = learningSbtProject("analytics").dependsOn(common).settings()
+
+lazy val website = learningSbtProject("website").dependsOn(common).settings()
+
+def learningSbtProject(name: String): Project = {
+  Project(name, file(name)).settings(
+    version := "1.0",
+    organization := "com.github.dozaza",
+    libraryDependencies +=  "org.specs2" % "specs2_2.10" % "2.1.1" % "test"
+  )
 }
