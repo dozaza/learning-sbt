@@ -1,8 +1,13 @@
+// same as aritfactId in Maven
 name := "learning-sbt"
 
 libraryDependencies ++= Seq(
   "junit" % "junit" % "4.11" % "test",
-  "org.specs2" % "specs2_2.10" % "2.1.1" % "test"
+  "org.specs2" % "specs2_2.10" % "2.1.1" % "test",
+  // This will produce conflict
+//  "org.specs2" % "specs2_2.9.1" % "1.10" % "test",
+  "org.slf4j" % "slf4j-api" % "1.7.2",
+  "ch.qos.logback" % "logback-classic" % "1.0.7"
 //  organization.value % "core-library" % version.value
 )
 
@@ -51,7 +56,8 @@ lazy val website = learningSbtProject("website").dependsOn(common).settings()
 
 def learningSbtProject(name: String): Project = {
   Project(name, file(name)).settings(
-    version := "1.0",
+    version := "1.0.0g",
+    // Same as groupId in Maven
     organization := "com.github.dozaza",
     libraryDependencies +=  "org.specs2" % "specs2_2.10" % "2.1.1" % "test"
   )
