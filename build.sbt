@@ -62,3 +62,12 @@ def learningSbtProject(name: String): Project = {
     libraryDependencies +=  "org.specs2" % "specs2_2.10" % "2.1.1" % "test"
   )
 }
+
+testOptions in Test += Tests.Argument("html")
+
+// used for creating html test report
+libraryDependencies += "org.pegdown" % "pegdown" % "1.0.2" % "test"
+
+javaOptions in Test += "-Dspecs2.outDir=" + (target.value / "generated/test-reports").getAbsolutePath
+
+fork in Test := true
