@@ -71,3 +71,47 @@ libraryDependencies += "org.pegdown" % "pegdown" % "1.0.2" % "test"
 javaOptions in Test += "-Dspecs2.outDir=" + (target.value / "generated/test-reports").getAbsolutePath
 
 fork in Test := true
+
+val dependentJarDirectory = settingKey[File]("location of the unpacked dependent jars")
+
+dependentJarDirectory := target.value / "dependent-jars"
+
+val createDependentJarDirectory = taskKey[File]("create the dependent-jar directory")
+
+createDependentJarDirectory := {
+  sbt.IO.createDirectory(dependentJarDirectory.value)
+  dependentJarDirectory.value
+}
+
+val excludes = List("meta-inf", "license", "play.plugins", "reference.conf")
+
+def unpackFilter(target: File) = new NameFilter {
+  override def accept(name: String): Boolean = {
+    !excludes.exists(f => name.toLowerCase.startsWith(f)) && !file(target.getAbsolutePath + "/" + name).exists
+  }
+}
+
+def unpack(target: File, file: File, log: Logger) = {
+  log.debug("unpacking " + file.getName)
+  if (file.isDirectory) {
+    sbt.IO.copyDirectory(file, target)
+  } else {
+    sbt.IO.unzip(file, target, filter = unpackFilter(target))
+  }
+}
+
+def create(dir: File, buildJar: File) = {
+  val files = (dir ** "*").get.filter(_ != dir)
+  val filesWithPath = files.map { f =>
+    (f, f.relativeTo(dir).get.getPath)
+  }
+  sbt.IO.zip(filesWithPath, buildJar)
+}
+
+val createUberJar = taskKey[File]("create jar which we will run")
+
+createUberJar := {
+  val output = target.value / "build.jar"
+  create(dependentJarDirectory.value, output)
+  output
+}
