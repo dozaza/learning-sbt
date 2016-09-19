@@ -1,3 +1,5 @@
+import sbt.complete.Parser
+
 // same as aritfactId in Maven
 name := "learning-sbt"
 
@@ -114,4 +116,26 @@ createUberJar := {
   val output = target.value / "build.jar"
   create(dependentJarDirectory.value, output)
   output
+}
+
+val printCp = taskKey[Unit]("print class path")
+
+printCp := {
+  val logger = streams.value.log
+  TestProjectScala.println((fullClasspath in Compile).value, logger)
+}
+
+val dbQuery = inputKey[Unit]("Run a db query")
+
+val queryParser: Parser[String] = {
+  import complete.DefaultParsers._
+  token(any.*.map(_.mkString))
+}
+
+dbQuery := {
+  val logger = streams.value.log
+  val query = queryParser.parsed
+  logger.info(query)
+  throw new RuntimeException("Test error!!!!")
+  query
 }
