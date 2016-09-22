@@ -139,3 +139,5 @@ dbQuery := {
   throw new RuntimeException("Test error!!!!")
   query
 }
+
+org.scalastyle.sbt.ScalastylePlugin.Settings
