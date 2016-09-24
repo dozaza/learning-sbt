@@ -1,4 +1,5 @@
 import sbt.complete.Parser
+import AssemblyKeys._
 
 // same as aritfactId in Maven
 name := "learning-sbt"
@@ -141,3 +142,21 @@ dbQuery := {
 }
 
 org.scalastyle.sbt.ScalastylePlugin.Settings
+
+assemblySettings
+
+mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+  {
+    case "application.conf" => MergeStrategy.concat
+    case x => old(x)
+  }
+}
+
+excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
+  cp filter { f =>
+    (f.data.getName contains "commons-logging") ||
+      (f.data.getName contains "sbt-linK")
+  }
+}
+
+mainClass in assembly := Some("Global")
