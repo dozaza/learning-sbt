@@ -160,3 +160,10 @@ excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
 }
 
 mainClass in assembly := Some("Global")
+
+val scalaStyleReport = taskKey[File]("run scala style and create a report")
+
+scalaStyleReport := {
+  val result = org.scalastyle.sbt.PluginKeys.scalastyle.toTask("").value
+  ???
+}
