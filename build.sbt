@@ -167,3 +167,15 @@ scalaStyleReport := {
   val result = org.scalastyle.sbt.PluginKeys.scalastyle.toTask("").value
   ???
 }
+
+val gitHeadCommitSha2 = settingKey[Option[String]]("git commit sha")
+
+gitHeadCommitSha2 := {
+  try {
+    Some(Process("git rev-parse HEAD").lines.head)
+  } catch {
+    case _: Exception => None
+  }
+}
+
+version := "1.0-" + gitHeadCommitSha2.value.getOrElse("SNAPSHOT")
